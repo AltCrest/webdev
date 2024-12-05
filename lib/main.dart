@@ -12,6 +12,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        primarySwatch: Colors.purple,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+        fontFamily: 'Roboto', bottomAppBarTheme: BottomAppBarTheme(color: Colors.purple[800]),
+      ),
       home: MainScreen(),
     );
   }
@@ -28,8 +33,8 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _screens = [
     HomeScreen(),
     TimetableScreen(),
-    GradesScreen(),
     AssignmentsScreen(),
+    GradesScreen(),
     SettingsScreen(),
   ];
 
@@ -44,15 +49,30 @@ class _MainScreenState extends State<MainScreen> {
             _currentIndex = index;
           });
         },
-        iconSize: 50.0,
-        selectedItemColor: Colors.purple, // Black color for selected icons
-        unselectedItemColor: Colors.black,
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: 'Timetable'),
-          BottomNavigationBarItem(icon: Icon(Icons.description), label: 'Assignments'),
-          BottomNavigationBarItem(icon: Icon(Icons.assessment), label: 'Grades'),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
+        iconSize: 30.0,
+        selectedItemColor: Colors.purple[800],
+        unselectedItemColor: Colors.grey[700],
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_today),
+            label: 'Timetable',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.description),
+            label: 'Assignments',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.assessment),
+            label: 'Grades',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Settings',
+          ),
         ],
       ),
     );

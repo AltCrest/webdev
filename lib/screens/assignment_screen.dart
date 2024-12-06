@@ -151,7 +151,7 @@ class _AssignmentsScreenState extends State<AssignmentsScreen> {
                         firstDate: DateTime.now(),
                         lastDate: DateTime(2100),
                       );
-                      setState(() {}); // Update button text dynamically
+                      setState(() {});
                     },
                     icon: const Icon(Icons.calendar_today),
                     label: Text(

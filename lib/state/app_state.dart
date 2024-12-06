@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class AppState extends ChangeNotifier {
   // Timetable State
-  Map<String, String> timetable = {}; // Maps cell key (yyyyMMddHH) to event text
+  Map<String, String> timetable = {};
 
   void addEvent(String key, String event) {
     timetable[key] = event;
@@ -11,7 +11,7 @@ class AppState extends ChangeNotifier {
 
   void removeEvent(String key) {
     timetable.remove(key);
-    notifyListeners(); // Notifies UI of the changes
+    notifyListeners();
   }
 
 

@@ -96,7 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: weeklyEvents.length.clamp(0, 5), // Show up to 5 events
+      itemCount: weeklyEvents.length.clamp(0, 5),
       itemBuilder: (context, index) {
         final event = weeklyEvents[index];
         return Card(
@@ -132,13 +132,9 @@ class _HomeScreenState extends State<HomeScreen> {
     DateTime weekStart = now.subtract(Duration(days: now.weekday - 1)).add(Duration(days: 7 * weekOffset)); // Start of the week
     DateTime weekEnd = weekStart.add(const Duration(days: 6)); // End of the week
 
-    print("Week Start: $weekStart, Week End: $weekEnd"); // Debugging output
-
     List<String> keysToRemove = []; // To keep track of outdated keys
 
     appState.timetable.forEach((key, value) {
-      print("Checking event: $key => $value"); // Debugging output
-
       try {
         // Parse the key manually
         if (key.length == 10 && RegExp(r'^\d{10}$').hasMatch(key)) {
@@ -148,7 +144,6 @@ class _HomeScreenState extends State<HomeScreen> {
           int hour = int.parse(key.substring(8, 10));
 
           DateTime eventDate = DateTime(year, month, day, hour);
-          print("Parsed Event Date: $eventDate"); // Debugging output
 
           if (eventDate.isBefore(now)) {
             // Mark past events for removal
@@ -159,20 +154,16 @@ class _HomeScreenState extends State<HomeScreen> {
             String date = DateFormat('dd MMM yyyy').format(eventDate); // Date
             String time = DateFormat('HH:mm').format(eventDate);  // Time
             events.add({'day': dayName, 'date': date, 'time': time, 'event': value});
-            print("Event $value added to weekly events."); // Debugging output
           }
-        } else {
-          print("Invalid key format: $key"); // Debugging output
         }
       } catch (e) {
-        print("Error parsing key $key: $e");
+        // Handle parsing errors silently
       }
     });
 
     // Remove outdated events from AppState
     for (String key in keysToRemove) {
       appState.removeEvent(key); // This should call notifyListeners in AppState
-      print("Removed outdated event: $key");
     }
 
     // Sort events by day and time
@@ -191,12 +182,11 @@ class _HomeScreenState extends State<HomeScreen> {
     return events;
   }
 
-
   Widget _buildAssignmentOverview(AppState appState, bool isDarkMode) {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: appState.assignments.length.clamp(0, 5), // Show up to 5 assignments
+      itemCount: appState.assignments.length.clamp(0, 5),
       itemBuilder: (context, index) {
         final assignment = appState.assignments[index];
         return Card(

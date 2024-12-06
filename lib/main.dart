@@ -32,8 +32,8 @@ class MyApp extends StatelessWidget {
         ),
         scaffoldBackgroundColor: Colors.black,
         textTheme: const TextTheme(
-          bodyLarge: TextStyle(color: Colors.white), // Replaces bodyText1
-          bodyMedium: TextStyle(color: Colors.white), // Replaces bodyText2
+          bodyLarge: TextStyle(color: Colors.white),
+          bodyMedium: TextStyle(color: Colors.white),
         ),
         appBarTheme: AppBarTheme(
           backgroundColor: Colors.deepPurple,

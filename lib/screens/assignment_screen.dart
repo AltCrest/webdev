@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../state/app_state.dart';
 
 class AssignmentsScreen extends StatefulWidget {
   @override
@@ -6,181 +8,200 @@ class AssignmentsScreen extends StatefulWidget {
 }
 
 class _AssignmentsScreenState extends State<AssignmentsScreen> {
-  // List of available courses
-  final List<String> courses = ["INFT-3100-02", "INFT-3101-02", "INFT-3102-02", "INFT-3103-01", "INFT-3104-04"];
-
-  // List of assignments with course and due date
-  final List<Map<String, dynamic>> assignments = [
-    {'title': 'Project', 'course': 'INFT-3101-02', 'dueDate': '2024-12-06'},
-    {'title': 'Term Test 2', 'course': 'INFT-3102-02', 'dueDate': '2024-12-10'},
-    {'title': 'Assignment 3', 'course': 'INFT-3102-02', 'dueDate': '2024-12-10'},
-    {'title': 'Assignment 6', 'course': 'INFT-3100-02', 'dueDate': '2024-12-13'},
+  final List<String> courses = [
+    "INFT-3100-02",
+    "INFT-3101-02",
+    "INFT-3102-02",
+    "INFT-3103-01",
+    "INFT-3104-04"
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    _sortAssignmentsByDate(); // Ensure assignments are sorted initially
-  }
-
-  void _addAssignment(String title, String course, String dueDate) {
-    setState(() {
-      assignments.add({'title': title, 'course': course, 'dueDate': dueDate});
-      _sortAssignmentsByDate(); // Re-sort the list after adding a new assignment
-    });
-  }
-
-  void _deleteAssignment(int index) {
-    setState(() {
-      assignments.removeAt(index);
-    });
-  }
-
-  void _sortAssignmentsByDate() {
-    assignments.sort((a, b) {
-      final dateA = DateTime.parse(a['dueDate']);
-      final dateB = DateTime.parse(b['dueDate']);
-      return dateA.compareTo(dateB);
-    });
-  }
-
-  Future<void> _showAddAssignmentDialog() async {
-    final TextEditingController titleController = TextEditingController();
-    DateTime? selectedDate;
-    String? selectedCourse;
-
-    await showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Add Assignment'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Assignment title input
-              TextField(
-                controller: titleController,
-                decoration: const InputDecoration(labelText: 'Assignment Title'),
-              ),
-              const SizedBox(height: 16),
-              // Course selection dropdown
-              DropdownButtonFormField<String>(
-                value: selectedCourse,
-                items: courses.map((course) {
-                  return DropdownMenuItem(
-                    value: course,
-                    child: Text(course),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    selectedCourse = value;
-                  });
-                },
-                decoration: const InputDecoration(labelText: 'Select Course'),
-              ),
-              const SizedBox(height: 16),
-              // Due date picker
-              ElevatedButton.icon(
-                onPressed: () async {
-                  selectedDate = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime.now(),
-                    lastDate: DateTime(2100),
-                  );
-                  setState(() {}); // Update the button text dynamically
-                },
-                icon: const Icon(Icons.calendar_today),
-                label: Text(selectedDate == null
-                    ? 'Pick Due Date'
-                    : 'Selected: ${selectedDate!.toLocal().toString().split(' ')[0]}'),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                final title = titleController.text;
-                final course = selectedCourse;
-                final dueDate = selectedDate?.toLocal().toString().split(' ')[0];
-
-                if (title.isNotEmpty && course != null && dueDate != null) {
-                  _addAssignment(title, course, dueDate);
-                  Navigator.of(context).pop();
-                }
-              },
-              child: const Text('Add'),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  final TextEditingController titleController = TextEditingController();
+  String? selectedCourse;
+  DateTime? selectedDate;
 
   @override
   Widget build(BuildContext context) {
+    final appState = Provider.of<AppState>(context);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Assignments'),
+        backgroundColor: Colors.deepPurple,
       ),
-      body: ListView.builder(
+      body: appState.assignments.isEmpty
+          ? Center(
+        child: Text(
+          'No upcoming assignments.',
+          style: TextStyle(
+            fontSize: 16,
+            color: isDarkMode ? Colors.white70 : Colors.grey,
+          ),
+        ),
+      )
+          : ListView.builder(
         padding: const EdgeInsets.all(16.0),
-        itemCount: assignments.length,
+        itemCount: appState.assignments.length,
         itemBuilder: (context, index) {
-          final item = assignments[index];
-          return Dismissible(
-            key: Key(item['title']),
-            direction: DismissDirection.endToStart,
-            background: Container(
-              color: Colors.red,
-              alignment: Alignment.centerRight,
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: const Icon(Icons.delete, color: Colors.white),
-            ),
-            onDismissed: (direction) {
-              _deleteAssignment(index);
-
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('${item['title']} deleted')),
-              );
-            },
-            child: Card(
-              margin: const EdgeInsets.symmetric(vertical: 8.0),
-              elevation: 4,
-              child: ListTile(
-                title: Text(
-                  item['title'],
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          final assignment = appState.assignments[index];
+          return Card(
+            margin: const EdgeInsets.symmetric(vertical: 8.0),
+            elevation: 4,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: ListTile(
+              leading: Icon(Icons.assignment, color: Colors.deepPurple, size: 32),
+              title: Text(
+                assignment['title'],
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: isDarkMode ? Colors.white : Colors.black,
                 ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Course: ${item['course']}',
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                    Text(
-                      'Due: ${item['dueDate']}',
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                  ],
+              ),
+              subtitle: Text(
+                'Course: ${assignment['course']}\nDue: ${assignment['dueDate']}',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: isDarkMode ? Colors.white70 : Colors.black54,
                 ),
+              ),
+              trailing: IconButton(
+                icon: const Icon(Icons.delete, color: Colors.red),
+                onPressed: () {
+                  setState(() {
+                    appState.removeAssignment(index);
+                  });
+                },
               ),
             ),
           );
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _showAddAssignmentDialog,
+        onPressed: () => _showAddAssignmentDialog(context, appState),
+        backgroundColor: Colors.deepPurple,
         child: const Icon(Icons.add),
       ),
+    );
+  }
+
+  Future<void> _showAddAssignmentDialog(BuildContext context, AppState appState) async {
+    await showDialog(
+      context: context,
+      builder: (context) {
+        final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text(
+                'Add Assignment',
+                style: TextStyle(
+                  color: isDarkMode ? Colors.white : Colors.black,
+                ),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: titleController,
+                    decoration: InputDecoration(
+                      labelText: 'Assignment Title',
+                      labelStyle: TextStyle(
+                        color: isDarkMode ? Colors.white70 : Colors.black87,
+                      ),
+                    ),
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField<String>(
+                    value: selectedCourse,
+                    items: courses.map((course) {
+                      return DropdownMenuItem(
+                        value: course,
+                        child: Text(
+                          course,
+                          style: TextStyle(
+                            color: isDarkMode ? Colors.white : Colors.black,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        selectedCourse = value;
+                      });
+                    },
+                    decoration: InputDecoration(
+                      labelText: 'Select Course',
+                      labelStyle: TextStyle(
+                        color: isDarkMode ? Colors.white70 : Colors.black87,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    onPressed: () async {
+                      selectedDate = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime.now(),
+                        lastDate: DateTime(2100),
+                      );
+                      setState(() {}); // Update button text dynamically
+                    },
+                    icon: const Icon(Icons.calendar_today),
+                    label: Text(
+                      selectedDate == null
+                          ? 'Pick Due Date'
+                          : 'Selected: ${selectedDate!.toLocal().toString().split(' ')[0]}',
+                      style: TextStyle(
+                        color: isDarkMode ? Colors.white : Colors.black,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.white : Colors.deepPurple,
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    if (titleController.text.isNotEmpty &&
+                        selectedCourse != null &&
+                        selectedDate != null) {
+                      appState.addAssignment({
+                        'title': titleController.text,
+                        'course': selectedCourse,
+                        'dueDate': selectedDate!.toLocal().toString().split(' ')[0],
+                      });
+                      Navigator.of(context).pop();
+                    }
+                  },
+                  child: Text(
+                    'Add',
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.white : Colors.deepPurple,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }

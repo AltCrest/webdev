@@ -1,21 +1,68 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'state/app_state.dart';
+import 'screens/home_screen.dart';
 import 'screens/assignment_screen.dart';
 import 'screens/grade_screen.dart';
-import 'screens/home_screen.dart';
 import 'screens/timetable_screen.dart';
 import 'screens/settings_screen.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => AppState(),
+      child: MyApp(),
+    ),
+  );
+}
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final appState = Provider.of<AppState>(context);
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.purple,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-        fontFamily: 'Roboto', bottomAppBarTheme: BottomAppBarTheme(color: Colors.purple[800]),
+      theme: appState.isDarkMode
+          ? ThemeData.dark().copyWith(
+        primaryColor: Colors.deepPurple,
+        colorScheme: ColorScheme.dark(
+          primary: Colors.deepPurple,
+          secondary: Colors.deepPurpleAccent,
+        ),
+        scaffoldBackgroundColor: Colors.black,
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(color: Colors.white), // Replaces bodyText1
+          bodyMedium: TextStyle(color: Colors.white), // Replaces bodyText2
+        ),
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.deepPurple,
+          titleTextStyle: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      )
+          : ThemeData.light().copyWith(
+        primaryColor: Colors.deepPurple,
+        colorScheme: ColorScheme.light(
+          primary: Colors.deepPurple,
+          secondary: Colors.deepPurpleAccent,
+        ),
+        scaffoldBackgroundColor: Colors.white,
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(color: Colors.black), // Replaces bodyText1
+          bodyMedium: TextStyle(color: Colors.black), // Replaces bodyText2
+        ),
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.deepPurple,
+          titleTextStyle: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
       home: MainScreen(),
     );
@@ -49,9 +96,8 @@ class _MainScreenState extends State<MainScreen> {
             _currentIndex = index;
           });
         },
-        iconSize: 30.0,
-        selectedItemColor: Colors.purple[800],
-        unselectedItemColor: Colors.grey[700],
+        selectedItemColor: Colors.deepPurple,
+        unselectedItemColor: Colors.grey,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
